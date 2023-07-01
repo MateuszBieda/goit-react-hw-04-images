@@ -1,133 +1,100 @@
 import css from 'App.module.css';
-import { Component } from 'react';
 import { Searchbar } from './Searchbar/Searchbar.jsx';
 import { Button } from './Button/Button.jsx';
 import { ImageGallery } from './ImageGallery/ImageGallery.jsx';
 import { fetchImages } from 'services/api.js';
 import { Loader } from './Loader/Loader.jsx';
-//import { Rings } from 'react-loader-spinner';
-
-// import { Loader } from './Loader/Loader.jsx';
+import { useState, useEffect } from 'react';
 import { Modal } from './Modal/Modal.jsx';
 
-export class App extends Component {
-  state = {
-    query: '',
-    images: [],
-    page: 1,
-    currentLargeImageURL: '',
-    error: null,
-    isLoading: false,
-    showModal: false,
+export const App = () => {
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [currentLargeImageURL, setCurrentLargeImageURL] = useState('');
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  const onOpenModalWithLargeImage = currentLargeImageURL => {
+    setShowModal(true);
+    setCurrentLargeImageURL(currentLargeImageURL);
   };
 
-  onOpenModalWithLargeImage = url => {
-    this.setState({ showModal: true, currentLargeImageURL: url });
+  const onModalClose = e => {
+    setShowModal(false);
   };
 
-  onModalClose = e => {
-    this.setState(({ showModal }) => ({
-      showModal: false,
-    }));
+  const handleLoadMore = () => {
+    setIsLoading(true);
+    setPage(prevPage => prevPage + 1);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
-
-  handleKeyDown = e => {
+  const handleKeyDown = e => {
     if (e.key === 'Escape') {
-      this.setState({ showModal: false });
+      setShowModal(false);
     }
   };
 
-  handleBackdrop = e => {
-    if (e.target === e.currentTarget) {
-      this.setState({ showModal: false });
-    }
-  };
+  // const handleBackdrop = e => {
+  //   if (e.target === e.currentTarget) {
+  //     setShowModal(false);
+  //   }
+  // };
 
-  addFetchedImages = async (query, page) => {
+  useEffect(() => {
+    addFetchedImages(query, page);
+  }, [query, page]);
+
+  const addFetchedImages = async (query, page) => {
     try {
-      this.setState({
-        isLoading: true,
-      });
+      setIsLoading(true);
       const elements = await fetchImages(query, page);
 
-      this.setState(prevState => ({
-        images: [...prevState.images, ...elements],
-        isLoading: false,
-      }));
-      console.log(this.props);
+      setImages(prevImages => [...prevImages, ...elements]);
+
+      setIsLoading(false);
+
       if (elements.length === 0) {
         alert(
           "Sorry, we can't find anything for your request. Please try again"
         );
       }
     } catch (error) {
-      this.setState({
-        error: error.message,
-      });
+      setError({ error });
     } finally {
-      this.setState({
-        isLoading: false,
-      });
+      setIsLoading(false);
     }
   };
 
-  componentDidUpdate(_, prevState) {
-    if (
-      prevState.page !== this.state.page ||
-      prevState.query !== this.state.query
-    ) {
-      this.addFetchedImages(this.state.query, this.state.page);
-    }
-  }
-
-  // componentDidUpdate() {
-  //   fetchImages()
-  //     .then(response => {
-  //       console.log(response.data.hits);
-  //       this.setState({ images: response.data.hits });
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //     });
-
-  handleFormSubmit = query => {
+  const handleFormSubmit = query => {
     if (query.trim().length === 0) {
       alert('Please, enter request');
       return;
     }
-    this.setState({ query, page: 1, images: [] });
+    setQuery(query);
+    setImages([]);
+    setPage(1);
   };
 
-  render() {
-    const { images, isLoading, currentLargeImageURL, error } = this.state;
-    const {onModalClose}=this;
-    return (
-      <div className={css.app}>
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        {isLoading && <Loader />}
-        {error && <p>{error}</p>}
-        {images.length > 0 && (
-          <ImageGallery
-            images={images}
-            onClick={this.onOpenModalWithLargeImage}
-          />
-        )}
+  return (
+    <div className={css.app}>
+      <Searchbar onSubmit={handleFormSubmit} />
+      {isLoading && <Loader />}
+      {error && <p>{error}</p>}
+      {images.length > 0 && (
+        <ImageGallery images={images} onClick={onOpenModalWithLargeImage} />
+      )}
 
-        {images.length > 0 && <Button onClick={this.handleLoadMore} />}
-        {this.state.showModal && (
-          <Modal
-          onModalClose={onModalClose}
-            url={currentLargeImageURL}
-            onKeyDown={this.handleKeyDown}
-          />
-        )}
-      </div>
-    );
-  }
-}
+      {images.length > 0 && <Button onClick={handleLoadMore} />}
+      {showModal && (
+        <Modal
+        onModalClose={onModalClose()}
+          url={currentLargeImageURL}
+          
+          onKeyDown={handleKeyDown}
+        />
+      )}
+    </div>
+  );
+};  
