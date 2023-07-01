@@ -1,17 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import css from './Modal.module.css';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export const Modal = ({currentLargeImageURL,onModalClose }) => {
-  const [showModal, setShowModal] = useState(false);
+ 
 
   useEffect(() => {
 
 
-    const onModalClose = e => {
-      setShowModal(false);
-    };
+  
     const handleKeyDown = e => {
       if (e.code === 'Escape') {
         onModalClose();
