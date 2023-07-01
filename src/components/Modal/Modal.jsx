@@ -3,19 +3,14 @@ import PropTypes from 'prop-types';
 import css from './Modal.module.css';
 import { useEffect } from 'react';
 
-export const Modal = ({currentLargeImageURL,onModalClose }) => {
- 
-
+export const Modal = ({ currentLargeImageURL, onModalClose }) => {
   useEffect(() => {
-
-
-  
     const handleKeyDown = e => {
       if (e.code === 'Escape') {
         onModalClose();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
@@ -32,10 +27,9 @@ export const Modal = ({currentLargeImageURL,onModalClose }) => {
   return (
     <div className={css.overlay} onClick={handleBackdrop}>
       <div>
-        <img src={currentLargeImageURL} alt='' className={css.modal} />
+        <img src={currentLargeImageURL} alt="" className={css.modal} />
       </div>
     </div>
- 
   );
 };
 
