@@ -17,6 +17,7 @@ export const App = () => {
   const [showModal, setShowModal] = useState(false);
 
   const onOpenModalWithLargeImage = currentLargeImageURL => {
+    console.log(currentLargeImageURL);
     setShowModal(true);
     setCurrentLargeImageURL(currentLargeImageURL);
   };
@@ -36,17 +37,17 @@ export const App = () => {
     }
   };
 
-  // const handleBackdrop = e => {
-  //   if (e.target === e.currentTarget) {
-  //     setShowModal(false);
-  //   }
-  // };
 
   useEffect(() => {
     addFetchedImages(query, page);
   }, [query, page]);
 
   const addFetchedImages = async (query, page) => {
+
+    if (!query) {
+      return;
+    }
+  
     try {
       setIsLoading(true);
       const elements = await fetchImages(query, page);
@@ -89,12 +90,11 @@ export const App = () => {
       {images.length > 0 && <Button onClick={handleLoadMore} />}
       {showModal && (
         <Modal
-        onModalClose={onModalClose()}
-          url={currentLargeImageURL}
-          
+          onModalClose={onModalClose}
+          currentLargeImageURL={currentLargeImageURL}
           onKeyDown={handleKeyDown}
         />
       )}
     </div>
   );
-};  
+};
